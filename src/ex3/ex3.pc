@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <string.h>
+
+#include <stdlib.h>
+
+#define USERNAME "hr"
+#define PASSWORD "password"
+
+#include <sqlca.h>
+#include <oraca.h>
+
+EXEC ORACLE OPTION(ORACA = YES);
+
+char *username = USERNAME;
+char *password = PASSWORD;
+VARCHAR connect_string[200];
+VARCHAR dynstmt[80];
+VARCHAR ename[10];
+int deptno = 80;
+
+void sql_error(char *msg);
+
+void main()
+{
+    EXEC SQL WHENEVER SQLERROR DO sql_error("Oracle error");
+    oraca.orastxtf = ORASTFERR;
+
+    strcpy(connect_string.arr, "//localhost:1521/ORCLPDB1");
+    connect_string.len = strlen(connect_string.arr);
+
+    EXEC SQL CONNECT : username IDENTIFIED BY : password USING :connect_string;
+    puts("\nConnected to Oracle.\n");
+
+    strcpy((char *)dynstmt.arr,
+           "SELECT first_name FROM employees WHERE department_id = :v1");
+    dynstmt.len = (unsigned short)strlen((char *)dynstmt.arr);
+
+    puts((char *)dynstmt.arr);
+    printf("   v1 = %d\n", deptno);
+    printf("\nEmployee\n");
+    printf("--------\n");
+
+    EXEC SQL PREPARE S FROM : dynstmt;
+    EXEC SQL DECLARE C CURSOR FOR S;
+    EXEC SQL OPEN C USING : deptno;
+
+    EXEC SQL WHENEVER NOT FOUND DO break;
+
+    for (;;)
+    {
+        EXEC SQL FETCH C INTO : ename;
+        ename.arr[ename.len] = '\0';
+        puts((char *)ename.arr);
+    }
+
+    printf("\nQuery returned %d row%s.\n\n", sqlca.sqlerrd[2],
+           (sqlca.sqlerrd[2] == 1) ? "" : "s");
+
+    EXEC SQL CLOSE C;
+
+    EXEC SQL COMMIT RELEASE;
+
+    puts((char *)"Thank you.\n");
+    exit(0);
+}
+
+#if defined(__STDC__)
+void sql_error(char *msg)
+#else
+void sql_error(msg) char *msg;
+#endif
+{
+    printf("\n%s", msg);
+    sqlca.sqlerrm.sqlerrmc[sqlca.sqlerrm.sqlerrml] = '\0';
+    oraca.orastxt.orastxtc[oraca.orastxt.orastxtl] = '\0';
+    oraca.orasfnm.orasfnmc[oraca.orasfnm.orasfnml] = '\0';
+    printf("\n%s\n", sqlca.sqlerrm.sqlerrmc);
+    printf("in \"%s...\"\n", oraca.orastxt.orastxtc);
+    printf("on line %d of %s.\n\n", oraca.oraslnr,
+           oraca.orasfnm.orasfnmc);
+
+    /* 오라클 에러로 인해 무한루프가 도는 것을 방지  */
+    EXEC SQL WHENEVER SQLERROR CONTINUE;
+    EXEC SQL CLOSE C;
+    EXEC SQL ROLLBACK RELEASE;
+    exit(1);
+}

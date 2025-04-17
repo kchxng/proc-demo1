@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <sqlca.h>
+#include <string.h>
+
+void main() {
+   EXEC SQL BEGIN DECLARE SECTION;
+      VARCHAR username[20];
+      VARCHAR password[20];
+   EXEC SQL END DECLARE SECTION;
+
+   strcpy(username.arr, "hr");
+   strcpy(password.arr, "password");
+
+   EXEC SQL CONNECT :username IDENTIFIED BY :password;
+   printf("Connected to Oracle as %s\n", username.arr);
+
+   EXEC SQL COMMIT WORK RELEASE;
+   printf("Disconnected from Oracle.\n");
+}

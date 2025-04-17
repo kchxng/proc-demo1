@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+EXEC SQL BEGIN DECLARE SECTION;
+  VARCHAR username[20];
+  VARCHAR password[20];
+  VARCHAR connect_string[200];
+  int id;
+  VARCHAR first_name[20];
+  VARCHAR email[200];
+  char phone_number[14];
+  int salary;
+EXEC SQL END DECLARE SECTION;
+
+EXEC SQL INCLUDE sqlca;
+
+void sql_error();
+
+main()
+{
+  strcpy(username.arr, "HR");
+  username.len = strlen(username.arr);
+
+  strcpy(password.arr, "password");
+  password.len = strlen(password.arr);
+
+  strcpy(connect_string.arr, "//localhost:1521/ORCLPDB1");
+  connect_string.len = strlen(connect_string.arr);
+
+  EXEC SQL WHENEVER SQLERROR DO sql_error();
+
+  EXEC SQL CONNECT : username IDENTIFIED BY : password USING : connect_string;
+
+  printf("\nConnected to ORACLE as user:%s\n", username.arr);
+
+  EXEC SQL DECLARE cur CURSOR FOR
+      SELECT first_name,
+      email, phone_number, salary FROM employees WHERE employee_id < 200;
+
+  EXEC SQL OPEN cur;
+
+  for (;;)
+  {
+    EXEC SQL WHENEVER NOT FOUND DO break;
+    EXEC SQL FETCH cur
+        INTO : first_name,
+        : email,
+        : phone_number,
+        : salary;
+
+    first_name.arr[first_name.len] = '\0';
+    email.arr[email.len] = '\0';
+    printf("%s\t%s\t%s\t%d\n", first_name.arr, email.arr, phone_number, salary);
+  }
+
+  EXEC SQL CLOSE cur;
+
+  exit(0);
+}
+
+void sql_error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("\nORACLE error detected:\n");
+  printf("\n%.70s\n", sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}

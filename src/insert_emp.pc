@@ -1,0 +1,195 @@
+/* array_insert.pc */
+#include <stdio.h>
+#include <sqlca.h>
+#include <string.h>
+#include <stdlib.h>
+
+/* 배열 크기 정의 */
+#define ARRAY_SIZE 10
+
+int employee_id[ARRAY_SIZE];
+char first_name[ARRAY_SIZE][21];
+char last_name[ARRAY_SIZE][26];
+char email[ARRAY_SIZE][26];
+char phone_number[ARRAY_SIZE][21];
+char hire_date[ARRAY_SIZE][11];
+char job_id[ARRAY_SIZE][11];
+double salary[ARRAY_SIZE];
+double commission_pct[ARRAY_SIZE];
+int manager_id[ARRAY_SIZE];
+int department_id[ARRAY_SIZE];
+
+char username[20] = "hr";
+char password[20] = "password";
+
+
+/* 함수 선언 */
+void initialize_data();
+void sql_error();
+
+int main() {
+    EXEC SQL BEGIN DECLARE SECTION;
+    VARCHAR connect_string[200];
+    EXEC SQL END DECLARE SECTION;
+
+    strcpy(connect_string.arr, "//localhost:1521/ORCLPDB1");
+    connect_string.len = strlen(connect_string.arr);
+
+    /* 데이터 초기화 */
+    initialize_data();
+
+    EXEC SQL WHENEVER SQLERROR DO sql_error();
+
+    /* 데이터베이스 연결 */
+   EXEC SQL CONNECT : username IDENTIFIED BY : password USING : connect_string;
+
+    if (sqlca.sqlcode != 0) {
+        printf("Failed to connect to the database. SQLCODE: %d\n", sqlca.sqlcode);
+        return 1;
+    }
+
+   /* INSERT 문 실행 */
+    EXEC SQL FOR :ARRAY_SIZE
+        INSERT INTO employees (employee_id, first_name, last_name, email, phone_number, hire_date, job_id, salary, commission_pct, manager_id, department_id)
+        VALUES (:employee_id, :first_name, :last_name, :email, :phone_number, TO_DATE(:hire_date, 'YYYY-MM-DD'), :job_id, :salary, :commission_pct, :manager_id, :department_id);
+
+    if (sqlca.sqlcode == 0) {
+        printf("Successfully inserted %d rows.\n", ARRAY_SIZE);
+    } else {
+        printf("Failed to insert data. SQLCODE: %d\n", sqlca.sqlcode);
+    }
+
+    /* 데이터베이스 연결 해제 */
+    EXEC SQL COMMIT WORK RELEASE;
+
+    return 0;
+}
+
+void sql_error() {
+    printf("SQL error: %s\n", sqlca.sqlerrm.sqlerrmc);
+    EXEC SQL ROLLBACK WORK RELEASE;
+    exit(1);
+}
+
+/* 데이터 초기화 함수 */
+void initialize_data() {
+    employee_id[0] = 1001;
+    strcpy(first_name[0], "John");
+    strcpy(last_name[0], "Doe");
+    strcpy(email[0], "jdoe@example.com");
+    strcpy(phone_number[0], "123-456-7890");
+    strcpy(hire_date[0], "2023-08-01");
+    strcpy(job_id[0], "IT_PROG");
+    salary[0] = 6000.00;
+    commission_pct[0] = 0.00;
+    manager_id[0] = 100;
+    department_id[0] = 60;
+
+    employee_id[1] = 1002;
+    strcpy(first_name[1], "Jane");
+    strcpy(last_name[1], "Smith");
+    strcpy(email[1], "jsmith@example.com");
+    strcpy(phone_number[1], "987-654-3210");
+    strcpy(hire_date[1], "2023-07-15");
+    strcpy(job_id[1], "IT_PROG");
+    salary[1] = 6500.00;
+    commission_pct[1] = 0.00;
+    manager_id[1] = 100;
+    department_id[1] = 60;
+
+    employee_id[2] = 1003;
+    strcpy(first_name[2], "Emily");
+    strcpy(last_name[2], "Brown");
+    strcpy(email[2], "ebrown@example.com");
+    strcpy(phone_number[2], "555-123-4567");
+    strcpy(hire_date[2], "2023-06-01");
+    strcpy(job_id[2], "HR_REP");
+    salary[2] = 4500.00;
+    commission_pct[2] = 0.00;
+    manager_id[2] = 101;
+    department_id[2] = 50;
+
+    employee_id[3] = 1004;
+    strcpy(first_name[3], "Michael");
+    strcpy(last_name[3], "Johnson");
+    strcpy(email[3], "mjohnson@example.com");
+    strcpy(phone_number[3], "444-555-6666");
+    strcpy(hire_date[3], "2023-05-20");
+    strcpy(job_id[3], "HR_REP");
+    salary[3] = 4800.00;
+    commission_pct[3] = 0.00;
+    manager_id[3] = 101;
+    department_id[3] = 50;
+
+    employee_id[4] = 1005;
+    strcpy(first_name[4], "David");
+    strcpy(last_name[4], "Lee");
+    strcpy(email[4], "dlee@example.com");
+    strcpy(phone_number[4], "333-444-5555");
+    strcpy(hire_date[4], "2023-04-10");
+    strcpy(job_id[4], "SA_REP");
+    salary[4] = 5000.00;
+    commission_pct[4] = 0.05;
+    manager_id[4] = 102;
+    department_id[4] = 30;
+
+    employee_id[5] = 1006;
+    strcpy(first_name[5], "Sarah");
+    strcpy(last_name[5], "Kim");
+    strcpy(email[5], "skim@example.com");
+    strcpy(phone_number[5], "111-222-3333");
+    strcpy(hire_date[5], "2023-03-15");
+    strcpy(job_id[5], "SA_REP");
+    salary[5] = 5200.00;
+    commission_pct[5] = 0.07;
+    manager_id[5] = 102;
+    department_id[5] = 30;
+
+    employee_id[6] = 1007;
+    strcpy(first_name[6], "Chris");
+    strcpy(last_name[6], "Park");
+    strcpy(email[6], "cpark@example.com");
+    strcpy(phone_number[6], "666-777-8888");
+    strcpy(hire_date[6], "2023-02-20");
+    strcpy(job_id[6], "SA_REP");
+    salary[6] = 5300.00;
+    commission_pct[6] = 0.10;
+    manager_id[6] = 102;
+    department_id[6] = 30;
+
+    employee_id[7] = 1008;
+    strcpy(first_name[7], "Anna");
+    strcpy(last_name[7], "Williams");
+    strcpy(email[7], "awilliams@example.com");
+    strcpy(phone_number[7], "222-333-4444");
+    strcpy(hire_date[7], "2023-01-30");
+    strcpy(job_id[7], "MK_MAN");
+    salary[7] = 7500.00;
+    commission_pct[7] = 0.00;
+    manager_id[7] = 103;
+    department_id[7] = 20;
+
+    employee_id[8] = 1009;
+    strcpy(first_name[8], "Paul");
+    strcpy(last_name[8], "Anderson");
+    strcpy(email[8], "panderson@example.com");
+    strcpy(phone_number[8], "777-888-9999");
+    strcpy(hire_date[8], "2022-12-05");
+    strcpy(job_id[8], "MK_MAN");
+    salary[8] = 7700.00;
+    commission_pct[8] = 0.00;
+    manager_id[8] = 103;
+    department_id[8] = 20;
+
+    employee_id[9] = 1010;
+    strcpy(first_name[9], "Laura");
+    strcpy(last_name[9], "Martinez");
+    strcpy(email[9], "lmartinez@example.com");
+    strcpy(phone_number[9], "999-000-1111");
+    strcpy(hire_date[9], "2022-11-15");
+    strcpy(job_id[9], "AD_ASST");
+    salary[9] = 4000.00;
+    commission_pct[9] = 0.00;
+    manager_id[9] = 104;
+    department_id[9] = 10;
+}

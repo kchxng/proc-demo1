@@ -1,0 +1,17 @@
+/* main.h */
+#include <stdio.h>
+#include <sqlca.h>
+#include "example.h" /* 외부 함수 선언이 있는 헤더 파일 포함 */
+
+int main() {
+    const char *username = "hr";
+    const char *password = "password";
+
+    /* DB 연결 */
+    connect_to_db(username, password);
+
+    /* DB 연결 해제 */
+    disconnect_from_db();
+
+    return 0;
+}

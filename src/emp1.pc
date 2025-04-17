@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+EXEC SQL BEGIN DECLARE SECTION;
+   VARCHAR username[20];
+   VARCHAR password[20];
+   VARCHAR connect_string[200];   
+   int empno;
+   VARCHAR ename[20];
+    int sal;
+EXEC SQL END DECLARE SECTION;
+
+EXEC SQL INCLUDE sqlca;
+
+void sql_error();
+
+main()
+{
+    strcpy(username.arr, "HR");
+    username.len = strlen(username.arr);
+    strcpy(password.arr, "password");
+    password.len = strlen(password.arr);
+    strcpy(connect_string.arr, "//localhost:1521/ORCLPDB1");
+    connect_string.len = strlen(connect_string.arr);
+
+    EXEC SQL WHENEVER SQLERROR DO sql_error();
+
+    EXEC SQL CONNECT :username IDENTIFIED BY :password USING :connect_string;
+
+    printf("Connected to Oracle as %s\n", username.arr);
+
+    while (1)
+    {
+        printf("Enter employee number: ");
+        scanf("%d", &empno);
+        if (empno == 0)
+            break;
+
+        EXEC SQL SELECT first_name, salary INTO :ename, :sal
+            FROM employees
+            WHERE employee_id = :empno;
+
+        ename.arr[ename.len] = '\0';
+        printf("Employee %d is %s and earns %d\n", empno, ename.arr, sal);
+    }
+    exit(0);
+}
+
+void sql_error()
+{
+    EXEC SQL WHENEVER SQLERROR CONTINUE;
+
+    printf("\nORACLE error detected:\n");
+    printf("\n%.70s\n", sqlca.sqlerrm.sqlerrmc);
+
+    EXEC SQL ROLLBACK WORK RELEASE;
+    exit(1);
+}
