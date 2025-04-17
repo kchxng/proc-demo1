@@ -1,5 +1,7 @@
 ## Proc\*C language
 
+- URL: [click](https://blog.allres.co.kr/board/ORACLE_PROC) `https://blog.allres.co.kr/board/ORACLE_PROC`
+
 ### Structure
 
 ```bash
